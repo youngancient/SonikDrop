@@ -1,0 +1,19 @@
+{
+  "name": "sonicdrop",
+  "version": "1.0.0",
+  "description": "An Airdrop distribution Bot and service.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.10"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3"
+  }
+}
