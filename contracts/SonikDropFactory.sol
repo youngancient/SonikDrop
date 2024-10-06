@@ -9,11 +9,13 @@ contract SonikDropFactory {
     // 2. Adding a time lock
     address collector;
 
-    uint256 public counter;
-    mapping(uint => SonikDrop) idTosonikDropClones;
-    SonikDrop[] allSonikClones;
+    uint256 public cloneCount;
 
-    uint256 baseFee = 0.0002 ether;
+    mapping(address => SonikDrop[]) ownerToSonikDropClones;
+
+    SonikDrop[] allSonikDropClones;
+
+    uint256 baseFee;
 
     constructor() {
         collector = msg.sender;
@@ -39,6 +41,11 @@ contract SonikDropFactory {
         uint256 _claimTime,
         uint256 _noOfClaimers
     ) private returns (SonikDrop newSonik_) {
+
+        if(baseFee == 0) {
+            revert Errors.FeeNotSet();
+        }
+        
         if (msg.sender == address(0)) {
             revert Errors.ZeroAddressDetected();
         }
@@ -48,7 +55,6 @@ contract SonikDropFactory {
 
         _chargeFee(_noOfClaimers);
 
-        uint256 _id = counter + 1;
         newSonik_ = new SonikDrop(
             _tokenAddress,
             _merkleRoot,
@@ -57,9 +63,9 @@ contract SonikDropFactory {
             msg.sender,
             _noOfClaimers
         );
-        idTosonikDropClones[_id] = newSonik_;
-        allSonikClones.push(newSonik_);
-        counter++;
+        ownerToSonikDropClones[msg.sender].push(newSonik_);
+        allSonikDropClones.push(newSonik_);
+        cloneCount++;
 
         emit Events.SonikCloneCreated(
             msg.sender,
@@ -99,17 +105,24 @@ contract SonikDropFactory {
             );
     }
 
-    function getSonikDrop(uint256 _id) external view returns (SonikDrop) {
-        return idTosonikDropClones[_id];
+    function getOwnerSonikDropClones(address _owner ) external view returns (SonikDrop[] memory) {
+        return ownerToSonikDropClones[_owner];
     }
 
-    function getAllSonikDrops() external view returns (SonikDrop[] memory) {
-        return allSonikClones;
+    function getAllSonikDropClones() external view returns (SonikDrop[] memory) {
+        return allSonikDropClones;
     }
 
     function withdrawFees() external payable {
         _onlyCollector();
+        uint256 _contractBalance = address(this).balance;
+
+        if(_contractBalance == 0){
+            revert Errors.ZeroValueDetected();
+        }
+
         (bool success, ) = collector.call{value: address(this).balance}("");
+        
         if (!success) {
             revert Errors.WithdrawalFailed();
         }
@@ -123,10 +136,22 @@ contract SonikDropFactory {
             revert Errors.ZeroAddressDetected();
         }
         collector = _newCollector;
+
         emit Events.CollectorUpdated(
             _oldCollector,
             block.timestamp,
             _newCollector
         );
+    }
+
+    function updateFee(uint256 _newFee) external{
+        _onlyCollector();
+        if(_newFee == 0) {
+            revert Errors.ZeroValueDetected();
+        }
+        uint256 _prevFee = baseFee;
+        baseFee = _newFee;
+
+        emit Events.FeeUpdated(_prevFee, _newFee, block.timestamp);
     }
 }

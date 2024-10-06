@@ -252,19 +252,19 @@ contract SonikDrop {
         emit Events.WithdrawalSuccessful(msg.sender, contractBalance);
     }
 
-    // @user for owner to transfer ownership
-    function transferOwnership(address _newOwner) external {
-        sanityCheck(_newOwner);
-        onlyOwner();
+    // // @user for owner to transfer ownership
+    // function transferOwnership(address _newOwner) external {
+    //     sanityCheck(_newOwner);
+    //     onlyOwner();
 
-        if (owner == _newOwner) {
-            revert Errors.CannotSetOwnerTwice();
-        }
+    //     if (owner == _newOwner) {
+    //         revert Errors.CannotSetOwnerTwice();
+    //     }
 
-        owner = _newOwner;
+    //     owner = _newOwner;
 
-        emit Events.OwnershipTransferred(msg.sender, _newOwner);
-    }
+    //     emit Events.OwnershipTransferred(msg.sender, _newOwner);
+    // }
 
     // @user for owner to fund the airdrop
     function fundAirdrop(uint256 _amount) external {
