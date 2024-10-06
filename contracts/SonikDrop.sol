@@ -9,6 +9,12 @@ import "./Utils.sol";
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
+// another possible feature is time-locking the airdrop
+// i.e people can only claim within a certain time
+// owners cannot withdraw tokens within that time
+
+// how do I make money / Fee strategy
+
 contract SonikDrop {
     // @dev state variables
     address public owner;
@@ -100,6 +106,14 @@ contract SonikDrop {
         bytes32[] calldata _merkleProof
     ) external {
         sanityCheck(msg.sender);
+
+        // check if NFT is required
+        if(isNftRequired) {
+            claimAirdrop(_amount, _merkleProof, 0);
+            return;
+        }
+
+        // check if User has claimed before
         if (_hasClaimedAirdrop(msg.sender)) {
             revert Errors.HasClaimedRewardsAlready();
         }
@@ -107,6 +121,37 @@ contract SonikDrop {
         //    checks if User is eligible
         if (!checkEligibility(msg.sender, _amount, _merkleProof)) {
             revert Errors.InvalidClaim();
+        }
+
+        claimedAirdropMap[msg.sender] = true;
+        totalAmountSpent += _amount;
+
+        if (!IERC20(tokenAddress).transfer(msg.sender, _amount)) {
+            revert Errors.TransferFailed();
+        }
+
+        emit Events.AirdropClaimed(msg.sender, _amount);
+    }
+
+     // @user for claiming airdrop with compulsory NFT ownership
+    function claimAirdrop(
+        uint256 _amount,
+        bytes32[] calldata _merkleProof,
+        uint256 _tokenId
+    ) public {
+        sanityCheck(msg.sender);
+        if (_hasClaimedAirdrop(msg.sender)) {
+            revert Errors.HasClaimedRewardsAlready();
+        }
+
+        //    checks if User is eligible
+        if (!checkEligibility(msg.sender, _amount, _merkleProof)) {
+            revert Errors.InvalidClaim();
+        }
+
+        // @dev checks if user has the required NFT
+        if(IERC721(nftAddress).ownerOf(_tokenId) != msg.sender) {
+            revert Errors.NFTNotFound();
         }
 
         claimedAirdropMap[msg.sender] = true;
@@ -146,7 +191,7 @@ contract SonikDrop {
         uint256 contractBalance = getContractBalance();
         zeroValueCheck(contractBalance);
 
-        if (totalAmountSpent <= contractBalance) {
+        if (totalAmountSpent <= contractBalance) {      // does this make any sense?
             revert Errors.UnclaimedTokensStillMuch();
         }
         /* if the totalAmountSpent is greater than the contract balance

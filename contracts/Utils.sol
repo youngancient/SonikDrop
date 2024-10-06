@@ -13,6 +13,7 @@ library Errors {
     error TransferFailed();
     error CannotSetOwnerTwice();
     error CannotSetAddressTwice();
+    error NFTNotFound();
 }
 
 library Events {
@@ -32,7 +33,7 @@ library Events {
         uint256 indexed _amount
     );
     event NftRequirementOff(address indexed _owner, uint256 indexed _timestamp);
-    
+
     event NftRequirementUpdated(
         address indexed _owner,
         uint256 indexed _timestamp,
