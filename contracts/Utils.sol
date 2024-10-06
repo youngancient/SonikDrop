@@ -14,6 +14,8 @@ library Errors {
     error CannotSetOwnerTwice();
     error CannotSetAddressTwice();
     error NFTNotFound();
+    error AirdropClaimEnded();
+    error AirdropClaimTimeNotEnded();
 }
 
 library Events {
@@ -38,5 +40,10 @@ library Events {
         address indexed _owner,
         uint256 indexed _timestamp,
         address indexed _newNft
+    );
+    event ClaimTimeUpdated(
+        address indexed _owner,
+        uint256 indexed _timestamp,
+        uint256 indexed _newClaimTime
     );
 }
