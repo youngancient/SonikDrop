@@ -7,7 +7,7 @@ contract SonikDropFactory {
     //  when a person interacts with the factory, he would options like
     // 1. Adding an NFT requirement
     // 2. Adding a time lock
-    address collector;
+    address public collector;
 
     uint256 public cloneCount;
 
@@ -15,7 +15,7 @@ contract SonikDropFactory {
 
     SonikDrop[] allSonikDropClones;
 
-    uint256 baseFee;
+    uint256 public baseFee;
 
     constructor() {
         collector = msg.sender;
@@ -154,4 +154,5 @@ contract SonikDropFactory {
 
         emit Events.FeeUpdated(_prevFee, _newFee, block.timestamp);
     }
+
 }
