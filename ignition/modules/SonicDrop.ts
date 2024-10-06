@@ -1,11 +1,11 @@
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 
-const SonicDropModule = buildModule("SonicDropModule", (m) => {
+const SonikDropModule = buildModule("SonikDropModule", (m) => {
  
-  const sonicDrop = m.contract("SonicDrop");
+  const sonicDrop = m.contract("SonikDrop");
 
   return { sonicDrop };
 });
 
-export default SonicDropModule;
+export default SonikDropModule;
