@@ -29,6 +29,10 @@ contract SonikDrop {
 
     uint256 public totalAmountSpent;
 
+    uint256 public totalNoOfClaimers;
+
+    uint256 public totalNoOfClaimed;
+
     // @dev mapping to track users that have claimed
     mapping(address => bool) claimedAirdropMap;
 
@@ -38,12 +42,14 @@ contract SonikDrop {
         bytes32 _merkleRoot,
         address _nftAddress,
         uint256 _claimTime,
-        address _owner
+        address _owner,
+        uint256 _noOfClaimers
     ) {
         sanityCheck(msg.sender);
         sanityCheck(_owner);
         sanityCheck(_tokenAddress);
         sanityCheck(_nftAddress);
+        zeroValueCheck(_noOfClaimers);
 
         tokenAddress = _tokenAddress;
         merkleRoot = _merkleRoot;
@@ -56,6 +62,8 @@ contract SonikDrop {
         isTimeLocked = _claimTime != 0;
 
         airdropEndTime = block.timestamp + _claimTime;
+
+        totalNoOfClaimers = _noOfClaimers;
     }
 
     // @dev prevents zero address from interacting with the contract
@@ -92,7 +100,7 @@ contract SonikDrop {
 
     // @dev checks contract token balance
     function getContractBalance() public view returns (uint256) {
-        onlyOwner();
+        // onlyOwner();
         return IERC20(tokenAddress).balanceOf(address(this));
     }
 
@@ -176,6 +184,17 @@ contract SonikDrop {
             revert Errors.NFTNotFound();
         }
 
+        uint256 _currentNoOfClaims = totalNoOfClaimed;
+
+        if (_currentNoOfClaims + 1 > totalNoOfClaimers) {
+            revert Errors.TotalClaimersExceeded();
+        }
+
+        if (getContractBalance() < _amount) {
+            revert Errors.InsufficientContractBalance();
+        }
+
+        totalNoOfClaimed += 1;
         claimedAirdropMap[msg.sender] = true;
         totalAmountSpent += _amount;
 
@@ -213,10 +232,10 @@ contract SonikDrop {
         uint256 contractBalance = getContractBalance();
         zeroValueCheck(contractBalance);
 
-        if (totalAmountSpent <= contractBalance) {
-            // does this make any sense?
-            revert Errors.UnclaimedTokensStillMuch();
-        }
+        // if (totalAmountSpent <= contractBalance) {
+        //     // does this make any sense?
+        //     revert Errors.UnclaimedTokensStillMuch();
+        // }
 
         if (isTimeLocked) {
             if (!hasAidropTimeEnded()) {
@@ -288,5 +307,18 @@ contract SonikDrop {
         airdropEndTime = block.timestamp + _claimTime;
 
         emit Events.ClaimTimeUpdated(msg.sender, airdropEndTime, _claimTime);
+    }
+
+    function updateClaimersNumber(uint256 _noOfClaimers) external {
+        onlyOwner();
+        zeroValueCheck(_noOfClaimers);
+
+        totalNoOfClaimers = _noOfClaimers;
+        
+        emit Events.ClaimersNumberUpdated(
+            msg.sender,
+            block.timestamp,
+            _noOfClaimers
+        );
     }
 }

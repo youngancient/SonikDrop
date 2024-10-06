@@ -16,12 +16,17 @@ library Errors {
     error NFTNotFound();
     error AirdropClaimEnded();
     error AirdropClaimTimeNotEnded();
+    error TotalClaimersExceeded();
+    error InsufficientContractBalance();
+    error FeeIsRequired();
 }
 
 library Events {
     // @dev events
     event AirdropClaimed(address indexed _user, uint256 indexed _amount);
+
     event WithdrawalSuccessful(address indexed _owner, uint256 indexed _amount);
+
     event MerkleRootUpdated(
         bytes32 indexed _oldMerkleRoot,
         bytes32 indexed _newMerkleRoot
@@ -46,4 +51,23 @@ library Events {
         uint256 indexed _timestamp,
         uint256 indexed _newClaimTime
     );
+
+    event SonikCloneCreated(
+        address indexed _owner,
+        uint256 indexed _timestamp,
+        address indexed _sonikClone
+    );
+
+    event ClaimersNumberUpdated(
+        address indexed _owner,
+        uint256 indexed _timestamp,
+        uint256 indexed _newClaimersNumber
+    );
+
+    event CollectorUpdated(
+        address indexed _oldCollector,
+        uint256 indexed _timestamp,
+        address indexed _newCollector
+    );
 }
+
