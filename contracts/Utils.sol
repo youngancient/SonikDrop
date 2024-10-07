@@ -19,6 +19,7 @@ library Errors {
     error TotalClaimersExceeded();
     error InsufficientContractBalance();
     error FeeIsRequired();
+    error FeeNotSet();
 }
 
 library Events {
@@ -68,6 +69,12 @@ library Events {
         address indexed _oldCollector,
         uint256 indexed _timestamp,
         address indexed _newCollector
+    );
+
+    event FeeUpdated(
+        uint256 indexed _oldFee,
+        uint256 indexed _newFee,
+        uint256 indexed _timestamp
     );
 }
 
